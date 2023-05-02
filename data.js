@@ -73,9 +73,4 @@ const words = [
     }
   ];
 
-  const selectedItems = ['5', '4'];
-  const finishedItems = ['8', '12'];
-  
   window.words = words;
-  window.selectedItems = selectedItems;
-  window.finishedItems = finishedItems;
