@@ -10,36 +10,75 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet"> 
-
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;700&display=swap" rel="stylesheet"> 
 <body>
   <div id="root"></div>
   
   <script type="text/babel">
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
-    root.render(<App words={words}
-    selectedItems={selectedItems} finishedItems={finishedItems}/>);
+    root.render(<App words={words}/>);
     
-   // Для параметра укажем значение по умолчанию [] (пустой список). Так мы подстрахуем себя от ошибок, если данные из внешнего источника не придут. А ещё это будет подсказкой, что в параметре передаётся массив.
-    function App({words = [], selectedItems = [], finishedItems = []}) {        
+  // Для параметра укажем значение по умолчанию [] (пустой список). Так мы подстрахуем себя от ошибок, если данные из внешнего источника не придут. А ещё это будет подсказкой, что в параметре передаётся массив.
+    function App({words = []}) {   
+      const finishedItems = [];     
+  // Результат игры будет отображаться на странице
+      const [stepsCount, setStepsCount] = React.useState(0);
+  // Функция для проверки ходов игрока 
+      const checkItems = () => {
+        setStepsCount((i) => i + 1);
+      };
+  
 
+  // Ошибочные ходы и нереализованные попытки
       return (
         <section className="game">
-         <Grid words={words} selectedItems={selectedItems} finishedItems={finishedItems}/>
+         <Hearts count={3} value={stepsCount}/>
+         <Grid words={words} finishedItems={finishedItems} checkItems={checkItems}/>
         </section>
       );
     }
 
-function Grid({words, selectedItems, finishedItems}) {
-  const cards = words.map((item) => (
+  // Компонент отвечает за попытки.
+  // На вход компонент будет принимать общее количество жизней (count) и количество потраченных жизней (value).
+  // Сравним номер элемента с количеством ходов и, если номер элемента по порядку меньше количества ходов, покрасим его в серый цвет. Тогда, например, после первого хода первый элемент получит класс hit-points-used, а остальные — класс hit-points-unused.
+    function Hearts({count = 0, value = 0}) {
+      return (
+        <p className="hit-points-indicator">
+          {Array(count).fill(null).map((_, i) => (
+            <span className={i < value ? 'hit-points-used' : 'hit-points-unused'}/>         
+          ))}
+        </p>
+      );
+    }
+
+  // Компонент отвечает за игровое поле
+   function Grid({words, finishedItems, checkItems}) {
+  // Нужен способ сообщить React, что изменилось состояние карточки и нужно повторно вызвать функцию для обновления интерфейса. Используем метод React.useState, где первый элемент массива - текущее состояние, второй - изменяемое состояние. Так React сможет отслеживать список выбранных карточек и обновлять интерфейс при его изменении.
+      const [selectedItems, setSelectedItems] = React.useState([]);
+  // Карточка сообщает полю, что по ней кликнул пользователь, и передаёт компоненту Grid дальнейшую обработку. Чтобы обработчик handleCardClick узнал, на какой именно карточке произошло событие, карточка должна передать свой идентификатор при вызове колбэка. 
+      const handleCardClick = (id) => {
+        if (selectedItems.includes(id)) {
+          return;
+        }
+  // После проверки функция сработает только в момент выбора новой карточки.
+  // Обработчик будет вызывать эту функцию при клике на карточку и увеличивать счётчик шагов
+        checkItems();
+  // Каждая карточка, по которой кликнули, добавляется к списку(содержит все элементы из текущего состояния items и новый элемент id)
+  // Этот массив передастся в качестве нового значения setSelectedItems что приводит к обновлению состояния компонента
+        setSelectedItems((items) => [...items, id]);
+    };
+
+    const cards = words.map((item) => (
        <Card 
         key={item.id}
+        id={item.id}
         type={item.type}
         url={item.url}
         text={item.word}
         isSelected={selectedItems.includes(item.id)}
         isFinished={finishedItems.includes(item.id)}
+        onCardClick={handleCardClick}
         />
       ));
     return (
@@ -47,25 +86,34 @@ function Grid({words, selectedItems, finishedItems}) {
         {cards}
         </ul>
     )
-}
-
+   }
     
-// единый компонент для карточек (и с текстом и с картинкой)
-    function Card ({url, text, type, isSelected = false, isFinished = true}) {
+  // Единый компонент для карточек (и с текстом и с картинкой)
+    function Card ({url, text, type, isSelected, isFinished, onCardClick, id}) {
       const content = type === 'image'
         ? <img src={url} width="185" height="100" alt=""/>
         : <span>{text}</span>;
 
-//Если карточка выбрана/отгадана, ей дополнительно присваивается класс
+  // Если карточка выбрана/отгадана, ей дополнительно присваивается класс
       const className = `card ${isSelected ? "selected" : ""} ${isFinished ? "disabled" : ""}`;                         
+      
+  // Изменения в приложении должны происходить по клику пользователя на карточку. Поэтому добавим обработчик события для карточки.
+  // Первый клик устанавливает выделение, второй — его снимает.
+      const handleClick = () => {
+        if(isFinished) {
+          return;
+        }
+  // Добавим ещё один параметр карточке — функцию обратного вызова (callback) onCardClick т.е Карточка должна вызвать колбэк при наступлении события на своём элементе. 
+        onCardClick(id);
+      };
+
       return (
-        <li className={className}>
+        <li onClick={handleClick} className={className}>
           {content}
         </li>
       );
-    }
+     }
 
   </script>
 </body>
 </html>
-
