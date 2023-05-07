@@ -1,4 +1,5 @@
 
+
   body {
     margin: 0;
     font-family: 'EB Garamond', serif;
@@ -18,9 +19,9 @@
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 30px;
-    padding-top: 30px;
-    padding-bottom: 30px;
     margin: 0 auto;
+    padding: 30px 10px;
+    min-width: min-content;
     max-width: 575px;
   }
 
@@ -54,18 +55,23 @@
   .card img {
     object-fit: cover;
     width: 100%;
-    height: 100%;
   }
 
   .selected {
     outline: 4px solid #009300;
   }
+
+  .error {
+    outline: 4px solid #cf1a1a;
+    animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    transform: translate3d(0, 0, 0);
+    perspective: 1000px;
+  }
   
   /* Отгаданная карточка */
   .card.disabled {
-    color: #ffffff;
-    background-color: #cfd7e4;
     cursor: default;
+    animation: repaint 0.8s 0.2s forwards;
   }
   
   .card.disabled img {
@@ -76,6 +82,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
+  /* Попытки */
   .hit-points-indicator {
     display: flex;
     flex-wrap: wrap;
@@ -99,6 +106,146 @@
     background-size: 40px;
     background-position: center;
     background-repeat: no-repeat;
+  }
+
+  /* Шкала прогресса */
+  .progress-wrapper {
+    display: flex;
+    justify-self: center;
+    width: 287px;
+    height: 12px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    background-image: repeating-linear-gradient(to right, #638d34, #638d34 46px, transparent 46px, transparent  48px);
+  }
+
+  /* Модальное окно */
+  .modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10; 
+    display: flex;
+    align-items: center;
+    justify-content: center;  
+    background-color: rgba(0, 0, 0, 0.6);
+    overflow-y: hidden;
+    overscroll-behavior: contain;
+    pointer-events: auto; 
+    animation: fadeIn 0.8s 1.6s both;
+  }
+
+  .modal-box {
+    position: relative;
+    width: 260px;
+    min-height: 200px;
+    padding: 0 0 40px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 5px 5px 20px #000000;
+    border-radius: 10px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .modal-caption {
+    margin-top: -20px;
+    margin-bottom: 10px;
+    padding: 70px 20px 30px;
+    font-size: 40px;
+    line-height: 40px;
+    text-align: center;
+    color: #009300;
+    max-height: 90px;
+  }
+   
+  .modal-description {
+    margin: 0;
+    margin-bottom: 20px;
+    padding: 0 40px;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  .modal-box-lose .modal-caption {
+    color: red;
+  }
+
+  .button {
+    padding: 10px 32px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: #ffffff;
+    background-color: #009300;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  
+  .button:hover,
+  .button:active {
+    background-color: #339733;
+  }
+  
+  /* анимация */
+
+  @keyframes repaint {
+    from {
+      transform: scale(1);
+    }
+  
+    50% {
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+  
+    to {
+      transform: scale(1);
+      color: #ffffff;
+      background-color: #cfd7e4;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+  
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+  
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+  
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+  
+    40%,
+    60% {
+      transform: translate3d(4px, 0, 0);
+    }
   }
 
 
