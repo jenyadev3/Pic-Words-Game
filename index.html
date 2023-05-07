@@ -7,38 +7,103 @@
   <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.18.5/babel.min.js"></script>
   <script src="data.js"></script>
+  <script src="settings.js"></script>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;700&display=swap" rel="stylesheet"> 
+  </head>
 <body>
-  <div id="root"></div>
-  
+  <div id="root"></div> 
   <script type="text/babel">
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
     root.render(<App words={words}/>);
-    
-  // Для параметра укажем значение по умолчанию [] (пустой список). Так мы подстрахуем себя от ошибок, если данные из внешнего источника не придут. А ещё это будет подсказкой, что в параметре передаётся массив.
-    function App({words = []}) {   
-      const finishedItems = [];     
-  // Результат игры будет отображаться на странице
-      const [stepsCount, setStepsCount] = React.useState(0);
-  // Функция для проверки ходов игрока 
-      const checkItems = () => {
-        setStepsCount((i) => i + 1);
-      };
-  
 
-  // Ошибочные ходы и нереализованные попытки
+// Функция отвечает за логику игры
+    const useGame = (words) => {
+    const [finishedItems, setFinishedItems] = React.useState([]);  
+    const [stepsCount, setStepsCount] = React.useState(0);
+
+  // Функция для проверки ходов игрока 
+    const checkItems = (firstItem, secondItem) => {
+      const firstWord = words.find(({id}) => id === firstItem);
+      const secondWord = words.find(({id}) => id === secondItem);
+  // Если пользователь выбрал две карточки одного типа, например, две картинки, не нужно проверять совпадение и засчитывать ошибку.
+      if (firstWord.type === secondWord.type) {
+        return;
+      }
+  /* Каждый объект данных карточки содержит поле token, с которым связаны слово и изображение. По значению этого поля будут сравниваться выбранные карточки.
+     Если токены карточек совпадают, то оба идентификатора добавляются к списку отгаданных.*/
+      if (firstWord.token === secondWord.token) {
+        setFinishedItems((items) => [...items, firstItem, secondItem]);
+      }
+        setStepsCount((i) => i + 1);
+    };
+
+  // Сброс игры
+    const handleReset = () => {
+      setFinishedItems([]);
+      setStepsCount(0);
+    }
+
+  /* Количество ошибочных ходов равно общему количеству ходов минус количество правильных пар. Список угаданных содержит все карточки. Для вычисления количества пар нужно длину списка finishedItems разделить пополам. */
+    const errorsCount = stepsCount - finishedItems.length / 2;
+    const lives = LIVES_COUNT - errorsCount;
+    const isWin = finishedItems.length === words.length;
+  /* Игра заканчивается при наступлении одного из двух условий: или все слова отгаданы, или количество ошибок больше трёх (все «жизни» закончились). Для отслеживания статуса игры добавляется переменная isGameOver */
+    const isGameOver = isWin || lives === 0;
+      return {
+        finishedItems,
+        handleReset,
+        checkItems,
+        errorsCount,
+        isGameOver,
+        isWin
+      };
+    };
+    
+    function App({words = []}) {   
+      const {
+        finishedItems,
+        handleReset,
+        checkItems,
+        errorsCount,
+        isGameOver,
+        isWin        
+      } = useGame(words);
+
+      const modalClassName = isWin ? '' : 'modal-box-lose';
+      const modalCaption = isWin ? 'Победа' : 'Поражение';
+      const modalDescription = `Вы нашли ${finishedItems.length / 2} слов`;
+
+  /*Если все условия окончания игры выполнены, то в переменной isGameOver будет содержаться значение true и условие
+   {isGameOver && <Modal/>} покажет модальное окно. При нажатии на кнопку сброса модальное окно закрывается, и можно начать игру сначала.*/
       return (
         <section className="game">
-         <Hearts count={3} value={stepsCount}/>
-         <Grid words={words} finishedItems={finishedItems} checkItems={checkItems}/>
-        </section>
+          <GameHeader value={finishedItems.length} max={words.length} errorsCount={errorsCount}/>
+          <Grid words={words} finishedItems={finishedItems} checkItems={checkItems}/>
+          {isGameOver && (
+          <Modal className={modalClassName}>
+          <h3 className="modal-caption">{modalCaption}</h3>
+          <p className="modal-description">{modalDescription}</p>
+          <button onClick={handleReset} className="button" type="button">Новая игра</button>
+          </Modal>
+          )}
+        </section>         
       );
     }
 
+  //"Шапка" игры
+    function GameHeader({value, max, errorsCount}) {
+      return (
+        <>
+        <Progress value={value} max={max}/>
+        <Hearts count={LIVES_COUNT} value={errorsCount}/>
+        </>
+      );
+    }
+    
   // Компонент отвечает за попытки.
   // На вход компонент будет принимать общее количество жизней (count) и количество потраченных жизней (value).
   // Сравним номер элемента с количеством ходов и, если номер элемента по порядку меньше количества ходов, покрасим его в серый цвет. Тогда, например, после первого хода первый элемент получит класс hit-points-used, а остальные — класс hit-points-unused.
@@ -52,32 +117,62 @@
       );
     }
 
+  // Прогресс игры
+    function Progress({value, max}) {
+      return (
+        <div className="progress-wrapper">
+         <div className="progress" style={{width: `${(max - value) / max * 100}%`}}>
+        </div>
+      </div>
+     );
+    }
+
+  // По окончанию игры появляется модальное окно
+    function Modal({children, className}) {
+      return (
+        <div className="modal">
+          <div className={`modal-box ${className}`}>
+            {children}           
+        </div>
+      </div>
+      );
+     }
+
   // Компонент отвечает за игровое поле
-   function Grid({words, finishedItems, checkItems}) {
-  // Нужен способ сообщить React, что изменилось состояние карточки и нужно повторно вызвать функцию для обновления интерфейса. Используем метод React.useState, где первый элемент массива - текущее состояние, второй - изменяемое состояние. Так React сможет отслеживать список выбранных карточек и обновлять интерфейс при его изменении.
+    function Grid({words, finishedItems, checkItems}) {
       const [selectedItems, setSelectedItems] = React.useState([]);
-  // Карточка сообщает полю, что по ней кликнул пользователь, и передаёт компоненту Grid дальнейшую обработку. Чтобы обработчик handleCardClick узнал, на какой именно карточке произошло событие, карточка должна передать свой идентификатор при вызове колбэка. 
+  /* Карточка сообщает полю, что по ней кликнул пользователь, и передаёт компоненту Grid дальнейшую обработку. Чтобы обработчик handleCardClick узнал, на какой именно карточке произошло событие, карточка должна передать свой идентификатор при вызове колбэка. 
+     Функция проверяет была ли уже выбрана карточка */
       const handleCardClick = (id) => {
         if (selectedItems.includes(id)) {
           return;
         }
-  // После проверки функция сработает только в момент выбора новой карточки.
-  // Обработчик будет вызывать эту функцию при клике на карточку и увеличивать счётчик шагов
-        checkItems();
-  // Каждая карточка, по которой кликнули, добавляется к списку(содержит все элементы из текущего состояния items и новый элемент id)
-  // Этот массив передастся в качестве нового значения setSelectedItems что приводит к обновлению состояния компонента
-        setSelectedItems((items) => [...items, id]);
-    };
+        switch (selectedItems.length) {
+          case 0:
+            setSelectedItems([id]);
+            break;
+          case 1:
+  /* Каждая карточка, по которой кликнули, добавляется к списку(содержит все элементы из текущего состояния items и новый элемент id)
+     Добавлен таймер, который снимет выделение с пары карточек через определенный период */
+            setSelectedItems((items) => [...items, id]);
+            checkItems(selectedItems[0], id);
+            setTimeout(() => {
+              setSelectedItems([]);
+            }, TIMEOUT);
+            break;
+          default:
+            setSelectedItems([]);
+        }
+      };
 
-    const cards = words.map((item) => (
+// Список карточек
+      const cards = words.map((item) => (
        <Card 
         key={item.id}
-        id={item.id}
-        type={item.type}
-        url={item.url}
-        text={item.word}
+        item={item}
         isSelected={selectedItems.includes(item.id)}
         isFinished={finishedItems.includes(item.id)}
+        isChecking={selectedItems.length === 2}
         onCardClick={handleCardClick}
         />
       ));
@@ -89,31 +184,33 @@
    }
     
   // Единый компонент для карточек (и с текстом и с картинкой)
-    function Card ({url, text, type, isSelected, isFinished, onCardClick, id}) {
+    function Card ({item, isSelected, isFinished, onCardClick, isChecking}) {
+      const {url, word: text, type, id } = item;
       const content = type === 'image'
         ? <img src={url} width="185" height="100" alt=""/>
         : <span>{text}</span>;
+  // Неправильная карточка. Карточка считается ошибочной, если это одна из двух выделенных карточек и пара не собрана.
+      const showError = isChecking && isSelected && !isFinished;
 
-  // Если карточка выбрана/отгадана, ей дополнительно присваивается класс
-      const className = `card ${isSelected ? "selected" : ""} ${isFinished ? "disabled" : ""}`;                         
+  // Если карточка выбрана/отгадана/неправильно выбрана, ей дополнительно присваивается класс
+      const className = `card ${isSelected ? 'selected' : ''} ${isFinished ? 'disabled' : ''} ${showError ? 'error' : ''}`;
       
-  // Изменения в приложении должны происходить по клику пользователя на карточку. Поэтому добавим обработчик события для карточки.
+  // Изменения в приложении должны происходить по клику пользователя на карточку. 
   // Первый клик устанавливает выделение, второй — его снимает.
       const handleClick = () => {
-        if(isFinished) {
+        if (isFinished) {
           return;
         }
   // Добавим ещё один параметр карточке — функцию обратного вызова (callback) onCardClick т.е Карточка должна вызвать колбэк при наступлении события на своём элементе. 
         onCardClick(id);
       };
-
-      return (
+        return (
         <li onClick={handleClick} className={className}>
           {content}
         </li>
       );
      }
-
   </script>
 </body>
 </html>
+
