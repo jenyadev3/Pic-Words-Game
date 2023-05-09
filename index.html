@@ -18,7 +18,7 @@
   <script type="text/babel">
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
-    root.render(<App words={words}/>);
+    root.render(<App words={words} results={results}/>);
 
 // Функция отвечает за логику игры
     const useGame = (words) => {
@@ -41,12 +41,6 @@
         setStepsCount((i) => i + 1);
     };
 
-  // Сброс игры
-    const handleReset = () => {
-      setFinishedItems([]);
-      setStepsCount(0);
-    }
-
   /* Количество ошибочных ходов равно общему количеству ходов минус количество правильных пар. Список угаданных содержит все карточки. Для вычисления количества пар нужно длину списка finishedItems разделить пополам. */
     const errorsCount = stepsCount - finishedItems.length / 2;
     const lives = LIVES_COUNT - errorsCount;
@@ -55,7 +49,6 @@
     const isGameOver = isWin || lives === 0;
       return {
         finishedItems,
-        handleReset,
         checkItems,
         errorsCount,
         isGameOver,
@@ -63,10 +56,67 @@
       };
     };
     
-    function App({words = []}) {   
+    function App({words = [], results = []}) {  
+  // Текущая страница игры 
+      const [page, setPage] = React.useState(AppRoute.Game);  
+      const [result, setResult] = React.useState(0);
+  // Переключение экранов игры. Компоненту GamePage передается колбек onShowResults, который при вызове изменит состояние page для приложения.
+  // Чтобы передать результат текущей игры в состояние приложения, в функции showResults параметр wordsCount
+      const showResults = (wordsCount) => {
+        setResult(wordsCount);
+        setPage(AppRoute.Results);
+      };
+      const handleReset = () => {
+        setPage(AppRoute.Game);
+      };
+      const getPage = (route) => {
+        switch (route) {
+          case AppRoute.Game:
+          return <GamePage words={words} onShowResults={showResults}/>;
+          case AppRoute.Results:
+          return (
+            <ResultsPage current={result} results={results} onResetGame={handleReset}/> 
+          );
+          default:
+            return null;
+        }
+      };
+      return getPage(page);
+    }
+    
+  // Для перехода к началу игры из экрана результатов компоненту ResultsPage передается в параметрах колбек onResetGame, который будет менять состояние page.
+    function ResultsPage({results, current, onResetGame}) {
+      const sortedResults = [...results, {name:'Ваш результат', steps: current}].sort((a, b) => b.steps - a.steps);
+      const resultsRows = sortedResults.map(({name, steps}, index) => (
+        <tr key={name} className={`result-table-row ${steps === current ? 'active' : ''}`}>
+          <td>{index + 1}</td>
+          <td>{name}</td>
+          <td>{steps}</td>
+        </tr>
+      ));
+      return (
+        <section className="result">
+          <h2>Лучшие результаты</h2>
+          <table className="result-table">
+            <thead>
+              <tr className="result-table-row">
+                <th>Место</th>
+                <th>Имя</th>
+                <th>Очки</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultsRows}
+            </tbody>
+          </table>
+          <button onClick={onResetGame} className="button" type="button">Новая игра</button>
+        </section>
+      );
+    }
+
+    function GamePage({words = [], onShowResults}) {
       const {
         finishedItems,
-        handleReset,
         checkItems,
         errorsCount,
         isGameOver,
@@ -75,10 +125,14 @@
 
       const modalClassName = isWin ? '' : 'modal-box-lose';
       const modalCaption = isWin ? 'Победа' : 'Поражение';
-      const modalDescription = `Вы нашли ${finishedItems.length / 2} слов`;
+      const modalDescription = `Вы нашли ${finishedItems.length / 2} слова`;
+
+      const handleResultsClick = () => {
+        onShowResults(finishedItems.length / 2);
+      };
 
   /*Если все условия окончания игры выполнены, то в переменной isGameOver будет содержаться значение true и условие
-   {isGameOver && <Modal/>} покажет модальное окно. При нажатии на кнопку сброса модальное окно закрывается, и можно начать игру сначала.*/
+   {isGameOver && <Modal/>} покажет модальное окно. Кнопка в модальном окне по клику вызовет колбек onShowResults и передаст ему число правильно собранных пар карточек. */
       return (
         <section className="game">
           <GameHeader value={finishedItems.length} max={words.length} errorsCount={errorsCount}/>
@@ -87,7 +141,7 @@
           <Modal className={modalClassName}>
           <h3 className="modal-caption">{modalCaption}</h3>
           <p className="modal-description">{modalDescription}</p>
-          <button onClick={handleReset} className="button" type="button">Новая игра</button>
+          <button onClick={handleResultsClick} className="button" type="button">Результаты</button>
           </Modal>
           )}
         </section>         
