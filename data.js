@@ -1,8 +1,8 @@
-const words = [
+const german = [
     {
       id: '1',
       token: 'fox',
-      word: 'Der Fuchs',
+      word: 'Fuchs',
       type: 'word'
     },
     {
@@ -14,7 +14,7 @@ const words = [
     {
       id: '3',
       token: 'turtle',
-      word: 'Die Schildkröte',
+      word: 'Schildkröte',
       type: 'word'
     },
     {
@@ -26,7 +26,7 @@ const words = [
     {
       id: '5',
       token: 'elephant',
-      word: 'Der Elefant',
+      word: 'Elefant',
       type: 'word'
     },
     {
@@ -38,7 +38,7 @@ const words = [
     {
       id: '7',
       token: 'squirrel',
-      word: 'Das Eichhorn',
+      word: 'Eichhorn',
       type: 'word'
     },
     {
@@ -50,7 +50,7 @@ const words = [
     {
       id: '9',
       token: 'raccoon',
-      word: 'Der Waschbär',
+      word: 'Waschbär',
       type: 'word'
     },
     {
@@ -62,7 +62,7 @@ const words = [
     {
       id: '11',
       token: 'deer',
-      word: 'Der Hirsch',
+      word: 'Hirsch',
       type: 'word'
     },
     {
@@ -73,11 +73,169 @@ const words = [
     }
   ];
 
+const italian = [
+    {
+      id: '1',
+      token: 'fox',
+      word: 'Volpe',
+      type: 'word'
+    },
+    {
+      id: '2',
+      token: 'fox',
+      url: 'images/photo-1.jpg',
+      type: 'image'
+    },
+    {
+      id: '3',
+      token: 'turtle',
+      word: 'Tartaruga',
+      type: 'word'
+    },
+    {
+      id: '4',
+      token: 'turtle',
+      url: 'images/photo-2.jpg',
+      type: 'image'
+    },
+    {
+      id: '5',
+      token: 'elephant',
+      word: 'Elefante',
+      type: 'word'
+    },
+    {
+      id: '6',
+      token: 'elephant',
+      url: 'images/photo-3.jpg',
+      type: 'image'
+    },
+    {
+      id: '7',
+      token: 'squirrel',
+      word: 'Proteine',
+      type: 'word'
+    },
+    {
+      id: '8',
+      token: 'squirrel',
+      url: 'images/photo-4.jpg',
+      type: 'image'
+    },
+    {
+      id: '9',
+      token: 'raccoon',
+      word: 'Procione',
+      type: 'word'
+    },
+    {
+      id: '10',
+      token: 'raccoon',
+      url: 'images/photo-5.jpg',
+      type: 'image'
+    },
+    {
+      id: '11',
+      token: 'deer',
+      word: 'Cervo',
+      type: 'word'
+    },
+    {
+      id: '12',
+      token: 'deer',
+      url: 'images/photo-6.jpg',
+      type: 'image'
+    }
+  ];
+
+  const finnish = [
+    {
+      id: '1',
+      token: 'fox',
+      word: 'Kettu',
+      type: 'word'
+    },
+    {
+      id: '2',
+      token: 'fox',
+      url: 'images/photo-1.jpg',
+      type: 'image'
+    },
+    {
+      id: '3',
+      token: 'turtle',
+      word: 'Kilpikonna',
+      type: 'word'
+    },
+    {
+      id: '4',
+      token: 'turtle',
+      url: 'images/photo-2.jpg',
+      type: 'image'
+    },
+    {
+      id: '5',
+      token: 'elephant',
+      word: 'Elefantti',
+      type: 'word'
+    },
+    {
+      id: '6',
+      token: 'elephant',
+      url: 'images/photo-3.jpg',
+      type: 'image'
+    },
+    {
+      id: '7',
+      token: 'squirrel',
+      word: 'Orava',
+      type: 'word'
+    },
+    {
+      id: '8',
+      token: 'squirrel',
+      url: 'images/photo-4.jpg',
+      type: 'image'
+    },
+    {
+      id: '9',
+      token: 'raccoon',
+      word: 'Pesukarhu',
+      type: 'word'
+    },
+    {
+      id: '10',
+      token: 'raccoon',
+      url: 'images/photo-5.jpg',
+      type: 'image'
+    },
+    {
+      id: '11',
+      token: 'deer',
+      word: 'Deer',
+      type: 'word'
+    },
+    {
+      id: '12',
+      token: 'deer',
+      url: 'images/photo-6.jpg',
+      type: 'image'
+    }
+  ];
+
+  const Words = {
+    finnish,
+    german,
+    italian
+  };
+
+  const getWords = (type) => [...Words[type]];
+
   const results = [
     { name: 'Вася', steps: 1 },
     { name: 'Аня', steps: 3 },
     { name: 'Петя', steps: 5 }
   ];
 
-  window.words = words;
+  window.getWords = getWords;
   window.results = results;
