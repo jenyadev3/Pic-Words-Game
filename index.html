@@ -6,6 +6,7 @@
   <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.18.5/babel.min.js"></script>
+  <script src="https://unpkg.com/@dubaua/get-declension@1.0.2/dist/get-declension.min.umd.js"></script>
   <script src="data.js"></script>
   <script src="settings.js"></script>
   <link rel="stylesheet" href="style.css">
@@ -18,7 +19,7 @@
   <script type="text/babel">
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
-    root.render(<App words={words} results={results}/>);
+    root.render(<App getWords={getWords} results={results}/>);
 
 // Функция отвечает за логику игры
     const useGame = (words) => {
@@ -55,11 +56,13 @@
         isWin
       };
     };
-    
-    function App({words = [], results = []}) {  
-  // Текущая страница игры 
-      const [page, setPage] = React.useState(AppRoute.Game);  
+
+    function App({getWords, results = []}) {  
+      const [page, setPage] = React.useState(AppRoute.Initial);
       const [result, setResult] = React.useState(0);
+  // Чтобы приложение само могло получить нужн(ый набор слов, добавляется состояние
+      const [words, setWords] = React.useState([]);
+
   // Переключение экранов игры. Компоненту GamePage передается колбек onShowResults, который при вызове изменит состояние page для приложения.
   // Чтобы передать результат текущей игры в состояние приложения, в функции showResults параметр wordsCount
       const showResults = (wordsCount) => {
@@ -67,14 +70,21 @@
         setPage(AppRoute.Results);
       };
       const handleReset = () => {
-        setPage(AppRoute.Game);
+        setPage(AppRoute.Initial);
       };
+      const handleStart = (type) => {
+        const words = getWords(type);
+        setWords(words);
+        setPage(AppRoute.Game);
+      }
       const getPage = (route) => {
         switch (route) {
+          case AppRoute.Initial:
+            return <InitialPage onStart={handleStart}/>;
           case AppRoute.Game:
-          return <GamePage words={words} onShowResults={showResults}/>;
+            return <GamePage words={words} onShowResults={showResults}/>;
           case AppRoute.Results:
-          return (
+            return (
             <ResultsPage current={result} results={results} onResetGame={handleReset}/> 
           );
           default:
@@ -82,6 +92,32 @@
         }
       };
       return getPage(page);
+    }
+
+  // Стартовая страница
+
+    function InitialPage({onStart}) {
+      const handleStart = (type) => {
+        onStart(type);
+      };
+      const buttons = GAME_TYPES.map(({icon, label, type}) => (
+        <button onClick={() => handleStart(type)} className={`ico-button ico-button-${icon}`} key={icon} type="button">
+          {label}
+        </button>
+      ));
+      return (
+        <section className="rules">
+          <h2>Добро пожаловать!</h2>
+          <h3>Правила игры:</h3>
+          <ul className="rules-list">
+            <li>Игра предназначена для разучивания слов иностранного языка.</li>
+            <li>В наборе есть пары карточек – со словом и рисунком.</li>
+            <li>Нужно выбрать карточку с рисунком и подходящую ей со словом.</li>
+            <li>Если карточки совпали — они становятся недоступными для выбора.</li>
+          </ul>
+          {buttons}
+        </section>
+      );
     }
     
   // Для перехода к началу игры из экрана результатов компоненту ResultsPage передается в параметрах колбек onResetGame, который будет менять состояние page.
@@ -123,9 +159,11 @@
         isWin        
       } = useGame(words);
 
+      const wordsDeclension = getDeclension({count: finishedItems.length / 2, one: "слово", few: "слова", many: "слов"});
+
       const modalClassName = isWin ? '' : 'modal-box-lose';
       const modalCaption = isWin ? 'Победа' : 'Поражение';
-      const modalDescription = `Вы нашли ${finishedItems.length / 2} слова`;
+      const modalDescription = `Вы нашли ${wordsDeclension}`;
 
       const handleResultsClick = () => {
         onShowResults(finishedItems.length / 2);

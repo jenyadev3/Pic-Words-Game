@@ -229,7 +229,8 @@ const italian = [
     italian
   };
 
-  const getWords = (type) => [...Words[type]];
+  // Перемешивание карточек
+  const getWords = (type) => RANDOMIZED ? [...Words[type]].sort(() => 0.5 - Math.random()) : [...Words[type]];
 
   const results = [
     { name: 'Вася', steps: 1 },

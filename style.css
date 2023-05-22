@@ -12,6 +12,86 @@
     background-size: cover;
   }
 
+  .rules {
+    padding: 30px 10px;
+    text-align: center;
+    min-width: min-content;
+  }
+    
+  .rules h2 {
+    margin: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    line-height: 32px;
+  }
+  
+  .rules h3 {
+    max-width: 520px;
+    text-align: center;
+    margin: 0 auto 15px;
+    font-size: 16px;
+    line-height: 20px;
+  }
+  
+  .rules-list {
+    padding: 0 20px 0 40px;
+    margin: 0 auto 40px;
+    font-size: 16px;
+    line-height: 20px;
+    max-width: 500px;
+    text-align: left;
+  }
+  
+  .rules-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+    
+  .ico-button {
+    padding: 7px 16px 10px 42px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: #ffffff;
+    background-color: #2e63b3;
+    background-size: 25px;
+    background-position: left 8px center;
+    background-repeat: no-repeat;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+  
+  .ico-button:hover {
+    background-color: #438eff;
+  }
+  
+  .ico-button:active {
+    background-color: #438eff;
+  }
+  
+  .ico-button-fin {
+    background-image: url("images/finnish.svg");
+  }
+  
+  .ico-button-ger {
+    background-image: url("images/german.svg");
+  }
+  
+  .ico-button-ita {
+    background-image: url("images/italy.svg");
+  }
+  
+  .rules .ico-button {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+  
   .game {
     display: grid;
     grid-template-columns: auto 1fr auto;
