@@ -203,7 +203,7 @@
       return (
         <p className="hit-points-indicator">
           {Array(count).fill(null).map((_, i) => (
-            <span className={i < value ? 'hit-points-used' : 'hit-points-unused'}/>         
+            <span className={i < value ? 'hit-points-used' : 'hit-points-unused'}></span>         
           ))}
         </p>
       );
