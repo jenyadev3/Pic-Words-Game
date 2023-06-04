@@ -12,4 +12,3 @@
 
 
 
-![njjn](https://github.com/jenyadev3/pic-words-game/assets/112981213/4802f955-d88b-4c49-bfe4-99c7bf2a6436)
